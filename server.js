@@ -12,6 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 // NEW: Student routes file ko yahan import kiya gaya hai
 const studentRoutes = require("./routes/studentRoutes");
 const teacherRoutes = require("./routes/teacherRoutes");
+const noticeRoutes = require("./routes/noticeRoutes");
 const app = express();
 
 // Middleware
@@ -33,6 +34,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
 // NEW: Teacher routes yahan add karein
 app.use("/api/teachers", teacherRoutes);
+// NEW: Notice routes yahan add karein
+app.use("/api/notices", noticeRoutes);
 
 // Sample Health Route
 app.get("/api/health", (req, res) => {
