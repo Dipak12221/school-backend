@@ -2,7 +2,7 @@ const Student = require("../models/Student");
 const Teacher = require("../models/Teacher");
 const Fee = require("../models/Fee");
 const Activity = require("../models/Activity");
-const MasterFee = require("../models/MasterFee"); // Aapka MasterFee model import kiya gaya hai
+const MasterFee = require("../models/MasterFee");
 
 exports.getDashboardStats = async (req, res) => {
   try {
@@ -27,13 +27,12 @@ exports.getDashboardStats = async (req, res) => {
       "Nov",
       "Dec",
     ];
-    const currentMonth = months[new Date().getMonth()]; // Jaise: "Oct"
+    const currentMonth = months[new Date().getMonth()];
 
     // 2. MasterFee se class-wise fees nikalna
     const masterFeeDoc = await MasterFee.findOne();
     let classFees = {};
     if (masterFeeDoc && masterFeeDoc.classFees) {
-      // Handle both Map (Mongoose default for objects) and plain Objects
       classFees =
         masterFeeDoc.classFees instanceof Map
           ? Object.fromEntries(masterFeeDoc.classFees)
@@ -52,26 +51,34 @@ exports.getDashboardStats = async (req, res) => {
     let unpaidStudentsCount = 0;
 
     activeStudents.forEach((student) => {
-      // Agar bacche ka enrollment paid list me nahi hai
       if (!paidEnrollments.includes(student.enrollment?.toLowerCase())) {
         unpaidStudentsCount++;
-
-        // Bacche ki class ki fee aur transport fee nikalna
         const cFee = classFees[student.class] || 0;
         const tFee = student.transportFee || 0;
-
         totalCurrentMonthPending += Number(cFee) + Number(tFee);
       }
     });
 
-    // 5. Arrears Jodna (Kati hui raseedo ka bacha hua due amount)
+    // 5. Arrears Jodna (BUG FIXED 🔥)
+    // Ab hum dueAmount nahi jodenge, hum Total Billed me se Total Paid minus karenge
     const arrearsResult = await Fee.aggregate([
-      { $match: { dueAmount: { $gt: 0 } } },
-      { $group: { _id: null, totalDue: { $sum: "$dueAmount" } } },
+      {
+        $group: {
+          _id: null,
+          totalGross: { $sum: "$grossTotal" },
+          totalPaid: { $sum: "$paidAmount" },
+          totalDiscount: { $sum: "$discount" },
+        },
+      },
     ]);
-    const arrears = arrearsResult.length > 0 ? arrearsResult[0].totalDue : 0;
 
-    // FINAL PENDING FEES = (Is mahine ki na aayi hui total fee) + (Purana bacha hua due)
+    let arrears = 0;
+    if (arrearsResult.length > 0) {
+      const { totalGross, totalPaid, totalDiscount } = arrearsResult[0];
+      arrears = Math.max(0, totalGross - totalPaid - totalDiscount);
+    }
+
+    // FINAL PENDING FEES = (Is mahine ki fee) + (Asli bacha hua Arrears)
     const finalPendingFees = totalCurrentMonthPending + arrears;
 
     // --- Recent Activities Logic ---
