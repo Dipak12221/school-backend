@@ -21,11 +21,10 @@ exports.addRoute = async (req, res) => {
       status,
     } = req.body;
 
-    // Stops array formatting ensure karein
+    // Stops array formatting
     const formattedStops = Array.isArray(stops)
       ? stops.map((s) => ({
           stopName: s.stopName?.trim(),
-          fare: Number(s.fare),
         }))
       : [];
 
@@ -52,11 +51,10 @@ exports.updateRoute = async (req, res) => {
   try {
     const updateData = { ...req.body };
 
-    // Agar stops update ho rahe hain to proper structure ensure karein
+    // Agar stops update ho rahe hain
     if (updateData.stops && Array.isArray(updateData.stops)) {
       updateData.stops = updateData.stops.map((s) => ({
         stopName: s.stopName?.trim(),
-        fare: Number(s.fare),
       }));
     }
 
@@ -82,7 +80,6 @@ exports.deleteRoute = async (req, res) => {
     const deletedRoute = await Transport.findByIdAndDelete(req.params.id);
     if (!deletedRoute)
       return res.status(404).json({ message: "Route not found" });
-
     res.status(200).json({ message: "Route deleted successfully" });
   } catch (error) {
     res
