@@ -17,6 +17,7 @@ const feeSchema = new mongoose.Schema(
     annualFee: { type: Number, default: 0 },
     includeExam: { type: Boolean, default: false },
     examFee: { type: Number, default: 0 },
+    previousDues: { type: Number, default: 0 },
     grossTotal: { type: Number, required: true },
     discount: { type: Number, default: 0 },
     totalFee: { type: Number, required: true },
