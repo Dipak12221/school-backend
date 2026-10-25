@@ -13,6 +13,8 @@ const authRoutes = require("./routes/authRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const teacherRoutes = require("./routes/teacherRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
+const galleryRoutes = require("./routes/galleryRoutes");
+
 const app = express();
 
 // Middleware
@@ -36,6 +38,7 @@ app.use("/api/students", studentRoutes);
 app.use("/api/teachers", teacherRoutes);
 // NEW: Notice routes yahan add karein
 app.use("/api/notices", noticeRoutes);
+app.use("/api/gallery", galleryRoutes);
 
 // Sample Health Route
 app.get("/api/health", (req, res) => {
