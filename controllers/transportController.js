@@ -11,7 +11,34 @@ exports.getAllRoutes = async (req, res) => {
 
 exports.addRoute = async (req, res) => {
   try {
-    const newRoute = new Transport(req.body);
+    const {
+      routeName,
+      busNumber,
+      vehicleNumber,
+      driverName,
+      driverPhone,
+      stops,
+      status,
+    } = req.body;
+
+    // Stops array formatting ensure karein
+    const formattedStops = Array.isArray(stops)
+      ? stops.map((s) => ({
+          stopName: s.stopName?.trim(),
+          fare: Number(s.fare),
+        }))
+      : [];
+
+    const newRoute = new Transport({
+      routeName,
+      busNumber,
+      vehicleNumber,
+      driverName,
+      driverPhone,
+      status: status || "Active",
+      stops: formattedStops,
+    });
+
     const savedRoute = await newRoute.save();
     res.status(201).json(savedRoute);
   } catch (error) {
@@ -23,13 +50,25 @@ exports.addRoute = async (req, res) => {
 
 exports.updateRoute = async (req, res) => {
   try {
+    const updateData = { ...req.body };
+
+    // Agar stops update ho rahe hain to proper structure ensure karein
+    if (updateData.stops && Array.isArray(updateData.stops)) {
+      updateData.stops = updateData.stops.map((s) => ({
+        stopName: s.stopName?.trim(),
+        fare: Number(s.fare),
+      }));
+    }
+
     const updatedRoute = await Transport.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true },
+      updateData,
+      { new: true, runValidators: true },
     );
+
     if (!updatedRoute)
       return res.status(404).json({ message: "Route not found" });
+
     res.status(200).json(updatedRoute);
   } catch (error) {
     res
@@ -43,6 +82,7 @@ exports.deleteRoute = async (req, res) => {
     const deletedRoute = await Transport.findByIdAndDelete(req.params.id);
     if (!deletedRoute)
       return res.status(404).json({ message: "Route not found" });
+
     res.status(200).json({ message: "Route deleted successfully" });
   } catch (error) {
     res
