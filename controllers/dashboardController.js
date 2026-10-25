@@ -1,21 +1,33 @@
 const Student = require("../models/Student");
 const Teacher = require("../models/Teacher");
 const Fee = require("../models/Fee");
+const Activity = require("../models/Activity"); // Naya Model
 
 exports.getDashboardStats = async (req, res) => {
   try {
-    // 1. Total Students Count
-    const totalStudents = await Student.countDocuments();
-
-    // 2. Total Teachers Count
+    const totalStudents = await Student.countDocuments({ status: "Active" });
     const totalTeachers = await Teacher.countDocuments();
-
-    // 3. Unique Classes Count (Student data se nikalenge)
     const distinctClasses = await Student.distinct("class");
     const totalClasses = distinctClasses.length;
 
-    // 4. Pending Fees Calculation
-    // Fee model me jinki dueAmount 0 se zyada hai, unka sum nikalte hain
+    // --- Current Month Pending Fee Logic ---
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const currentMonth = months[new Date().getMonth()]; // Jaise: "Oct"
+
+    // 1. Jin raseedo me due amount bacha hai, unka total (Generated Dues)
     const pendingFeesResult = await Fee.aggregate([
       { $match: { dueAmount: { $gt: 0 } } },
       { $group: { _id: null, totalDue: { $sum: "$dueAmount" } } },
@@ -23,18 +35,31 @@ exports.getDashboardStats = async (req, res) => {
     const pendingFees =
       pendingFeesResult.length > 0 ? pendingFeesResult[0].totalDue : 0;
 
-    // 5. Recent Activities (Optional: Filhal ke liye static array, baad me DB se la sakte hain)
-    const recentActivities = [
-      "School portal is running smoothly.",
-      `Total ${totalStudents} students registered.`,
-      `Pending fees detected: ₹${pendingFees}`,
-    ];
+    // 2. Kitne baccho ne is mahine ki fee bilkul nahi di hai?
+    const studentsWithFeesThisMonth = await Fee.distinct("enrollment", {
+      selectedMonths: currentMonth,
+    });
+    const unpaidStudentsCount =
+      totalStudents - studentsWithFeesThisMonth.length;
+
+    // --- Recent Activities Logic ---
+    // Database se last 5 activities uthayenge
+    const recentActivitiesDocs = await Activity.find()
+      .sort({ date: -1 })
+      .limit(5);
+    let recentActivities = recentActivitiesDocs.map((a) => a.message);
+
+    // Agar database khali hai to default message
+    if (recentActivities.length === 0) {
+      recentActivities = ["System initialized. No recent activities yet."];
+    }
 
     res.status(200).json({
       totalStudents,
       totalTeachers,
       totalClasses,
       pendingFees,
+      unpaidStudentsCount: unpaidStudentsCount > 0 ? unpaidStudentsCount : 0,
       recentActivities,
     });
   } catch (error) {

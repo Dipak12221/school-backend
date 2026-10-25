@@ -1,4 +1,5 @@
 const Fee = require("../models/Fee");
+const Activity = require("../models/Activity"); // Activity model import kiya gaya hai
 
 // 1. Get All Fee Records
 exports.getAllFees = async (req, res) => {
@@ -15,13 +16,20 @@ exports.getAllFees = async (req, res) => {
 // 2. Collect New Fee
 exports.createFee = async (req, res) => {
   try {
-    const { receiptNo, enrollment, studentName } = req.body;
+    const { receiptNo, enrollment, studentName, paidAmount } = req.body;
     if (!receiptNo || !enrollment || !studentName) {
       return res.status(400).json({ message: "Missing required fee details." });
     }
 
     const newFee = new Fee(req.body);
     const savedFee = await newFee.save();
+
+    // Nayi Activity Record Karein
+    const newActivity = new Activity({
+      message: `Fee Collected: ₹${paidAmount || 0} from ${savedFee.studentName} (Receipt: ${savedFee.receiptNo})`,
+    });
+    await newActivity.save();
+
     res.status(201).json(savedFee);
   } catch (error) {
     res
@@ -41,6 +49,13 @@ exports.updateFee = async (req, res) => {
 
     if (!updatedFee)
       return res.status(404).json({ message: "Fee record not found." });
+
+    // (Optional) Update hone par bhi activity record kar sakte hain
+    const newActivity = new Activity({
+      message: `Fee Record Updated: ${updatedFee.studentName} (Receipt: ${updatedFee.receiptNo})`,
+    });
+    await newActivity.save();
+
     res.status(200).json(updatedFee);
   } catch (error) {
     res
@@ -57,6 +72,13 @@ exports.deleteFee = async (req, res) => {
 
     if (!deletedFee)
       return res.status(404).json({ message: "Fee record not found." });
+
+    // Delete hone par Activity Record Karein
+    const newActivity = new Activity({
+      message: `Fee Record Deleted for ${deletedFee.studentName} (Receipt: ${deletedFee.receiptNo})`,
+    });
+    await newActivity.save();
+
     res.status(200).json({ message: "Fee record deleted successfully." });
   } catch (error) {
     res

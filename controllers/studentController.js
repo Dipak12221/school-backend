@@ -1,4 +1,5 @@
 const Student = require("../models/Student");
+const Activity = require("../models/Activity");
 
 // 1. Get All Students
 exports.getAllStudents = async (req, res) => {
@@ -37,6 +38,12 @@ exports.createStudent = async (req, res) => {
 
     const newStudent = new Student(req.body);
     const savedStudent = await newStudent.save();
+    // Create a new activity log
+    const newActivity = new Activity({
+      message: `New student added: ${savedStudent.name}`,
+    });
+    await newActivity.save();
+
     res.status(201).json(savedStudent);
   } catch (error) {
     res.status(500).json({
@@ -77,6 +84,11 @@ exports.deleteStudent = async (req, res) => {
     if (!deletedStudent) {
       return res.status(404).json({ message: "Student not found." });
     }
+    // Create an activity log
+    const newActivity = new Activity({
+      message: `Student deleted: ${deletedStudent.name}`,
+    });
+    await newActivity.save();
 
     res.status(200).json({ message: "Student deleted successfully." });
   } catch (error) {
