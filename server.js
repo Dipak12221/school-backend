@@ -14,6 +14,7 @@ const studentRoutes = require("./routes/studentRoutes");
 const teacherRoutes = require("./routes/teacherRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
 const galleryRoutes = require("./routes/galleryRoutes");
+const feeRoutes = require("./routes/feeRoutes");
 
 const app = express();
 
@@ -39,7 +40,7 @@ app.use("/api/teachers", teacherRoutes);
 // NEW: Notice routes yahan add karein
 app.use("/api/notices", noticeRoutes);
 app.use("/api/gallery", galleryRoutes);
-
+app.use("/api/fees", feeRoutes);
 // Sample Health Route
 app.get("/api/health", (req, res) => {
   res.json({ message: "Backend is running smoothly!" });
