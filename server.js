@@ -15,6 +15,7 @@ const teacherRoutes = require("./routes/teacherRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
 const galleryRoutes = require("./routes/galleryRoutes");
 const feeRoutes = require("./routes/feeRoutes");
+const transportRoutes = require("./routes/transportRoutes");
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/teachers", teacherRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/fees", feeRoutes);
+app.use("/api/transport", transportRoutes);
 
 // Sample Health Route
 app.get("/api/health", (req, res) => {
