@@ -41,6 +41,7 @@ app.use("/api/teachers", teacherRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/fees", feeRoutes);
+
 // Sample Health Route
 app.get("/api/health", (req, res) => {
   res.json({ message: "Backend is running smoothly!" });
