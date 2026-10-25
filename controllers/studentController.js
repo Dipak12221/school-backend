@@ -6,50 +6,43 @@ exports.getAllStudents = async (req, res) => {
     const students = await Student.find().sort({ createdAt: -1 });
     res.status(200).json(students);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Server Error: Unable to fetch students",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Server Error: Unable to fetch students",
+      error: error.message,
+    });
   }
 };
 
 // 2. Create / Add New Student (Admission)
 exports.createStudent = async (req, res) => {
   try {
-    const { enrollment, name, class: studentClass, mobile } = req.body;
+    // UPDATED: section is extracted and validated
+    const { enrollment, name, class: studentClass, section, mobile } = req.body;
 
     // Basic validation
-    if (!enrollment || !name || !studentClass || !mobile) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Please fill all required fields (Enrollment, Name, Class, Mobile).",
-        });
+    if (!enrollment || !name || !studentClass || !section || !mobile) {
+      return res.status(400).json({
+        message:
+          "Please fill all required fields (Enrollment, Name, Class, Section, Mobile).",
+      });
     }
 
     // Check if enrollment already exists
     const existingStudent = await Student.findOne({ enrollment });
     if (existingStudent) {
-      return res
-        .status(400)
-        .json({
-          message: "Student with this enrollment number already exists.",
-        });
+      return res.status(400).json({
+        message: "Student with this enrollment number already exists.",
+      });
     }
 
     const newStudent = new Student(req.body);
     const savedStudent = await newStudent.save();
     res.status(201).json(savedStudent);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Server Error: Unable to create student",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Server Error: Unable to create student",
+      error: error.message,
+    });
   }
 };
 
@@ -68,12 +61,10 @@ exports.updateStudent = async (req, res) => {
 
     res.status(200).json(updatedStudent);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Server Error: Unable to update student",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Server Error: Unable to update student",
+      error: error.message,
+    });
   }
 };
 
@@ -89,12 +80,10 @@ exports.deleteStudent = async (req, res) => {
 
     res.status(200).json({ message: "Student deleted successfully." });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Server Error: Unable to delete student",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Server Error: Unable to delete student",
+      error: error.message,
+    });
   }
 };
 
@@ -114,11 +103,9 @@ exports.bulkDeleteStudents = async (req, res) => {
       .status(200)
       .json({ message: "Selected students deleted successfully." });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Server Error: Unable to perform bulk delete",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Server Error: Unable to perform bulk delete",
+      error: error.message,
+    });
   }
 };

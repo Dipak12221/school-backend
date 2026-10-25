@@ -15,20 +15,33 @@ const studentSchema = new mongoose.Schema(
       default: "Male",
     },
     community: { type: String, default: "GEN" },
-    aadhaarNo: { type: String }, // [Note: Aadhaar numbers are securely handled/redacted per privacy rules]
+    aadhaarNo: { type: String },
+
+    // Academic Details
     class: { type: String, required: true },
+    section: { type: String, required: true }, // Naya Field
     rollNo: { type: String },
+
+    // Contact & Address
     mobile: { type: String, required: true },
     secondaryMobile: { type: String },
     address: { type: String },
     correspondenceAddress: { type: String },
     sameAsResidential: { type: Boolean, default: false },
+
+    // Admission & Fees
     studentType: { type: String, default: "New" },
-    isTransport: { type: Boolean, default: false },
-    routeId: { type: String },
-    routeName: { type: String, default: "None" },
-    transportFee: { type: Number, default: 0 },
     feeCategory: { type: String, default: "General" },
+
+    // Transport Details (Updated fields)
+    isTransport: { type: Boolean, default: false },
+    busId: { type: String },
+    busName: { type: String },
+    stopId: { type: String },
+    stopName: { type: String },
+    transportFee: { type: Number, default: 0 },
+
+    // Meta
     status: { type: String, enum: ["Active", "Inactive"], default: "Active" },
     photo: { type: String },
   },
