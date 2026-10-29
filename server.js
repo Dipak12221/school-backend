@@ -17,6 +17,7 @@ const galleryRoutes = require("./routes/galleryRoutes");
 const feeRoutes = require("./routes/feeRoutes");
 const transportRoutes = require("./routes/transportRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const settingRoutes = require("./routes/settingRoutes");
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/gallery", galleryRoutes);
 app.use("/api/fees", feeRoutes);
 app.use("/api/transport", transportRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/settings", settingRoutes);
 
 // Sample Health Route
 app.get("/api/health", (req, res) => {
